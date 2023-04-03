@@ -1,0 +1,19 @@
+name: Deploy Both Custom Layer and Lambda Function
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Deploy Custom Layer
+        uses: ./.github/workflows/deploy_custom_layer.yml
+
+      - name: Deploy Lambda Function
+        uses: ./.github/workflows/deploy_lambda_function.yml
