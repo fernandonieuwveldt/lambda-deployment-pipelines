@@ -2,12 +2,9 @@ name: Deploy Lambda Function
 
 on:
   push:
-    branches:
-      - main
-      - master
+    branches: main
+
   workflow_dispatch:
-    branches:
-      - '*'
 
 jobs:
   deploy:
