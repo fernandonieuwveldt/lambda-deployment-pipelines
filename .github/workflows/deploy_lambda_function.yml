@@ -30,7 +30,7 @@ jobs:
         mkdir package
         cp -r src/* package/
         cd package
-        # pip install -r ../requirements.txt --target .
+        pip install -r ../requirements.txt --target .
         zip -r ../lambda_function.zip .
 
     - name: Configure AWS credentials
