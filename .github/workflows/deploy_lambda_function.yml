@@ -16,17 +16,17 @@ jobs:
       with:
         python-version: 3.9
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+    # - name: Install dependencies
+    #   run: |
+    #     python -m pip install --upgrade pip
+    #     pip install -r requirements.txt
 
     - name: Package Lambda function
       run: |
         mkdir package
         cp -r src/* package/
         cd package
-        pip install -r ../requirements.txt --target .
+        # pip install -r ../requirements.txt --target .
         zip -r ../lambda_function.zip .
 
     - name: Configure AWS credentials
@@ -34,8 +34,8 @@ jobs:
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-west-2
+        aws-region: ${{ secrets.AWS_REGION }}
 
     - name: Deploy Lambda function
       run: |
-        aws lambda update-function-code --function-name FUNCTION_NAME --zip-file fileb://lambda_function.zip
+        aws lambda update-function-code --function-name github-actions-test --zip-file fileb://lambda_function.zip
