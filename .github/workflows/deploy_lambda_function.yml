@@ -1,0 +1,39 @@
+name: Deploy Lambda Function
+
+on:
+  push:
+    branches: [main]
+
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+
+    - name: Package Lambda function
+      run: |
+        mkdir package
+        cp -r src/* package/
+        cd package
+        pip install -r ../requirements.txt --target .
+        zip -r ../lambda_function.zip .
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Deploy Lambda function
+      run: |
+        aws lambda update-function-code --function-name github-actions-test --zip-file fileb://lambda_function.zip
