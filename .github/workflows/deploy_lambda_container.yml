@@ -51,6 +51,10 @@ jobs:
               --function-name lambda-container \
               --image-uri $IMAGE_URI \
               --publish
+
+        aws lambda wait function-updated \
+          --function-name lambda-container
+
          aws lambda update-function-configuration \
            --function-name lambda-container \
            --timeout 15 \
