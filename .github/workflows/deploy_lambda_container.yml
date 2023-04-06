@@ -16,11 +16,6 @@ jobs:
       with:
         python-version: 3.9
 
-    # - name: Configure AWS CLI
-    #   run: |
-    #     aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
-    #     aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-    #     aws configure set region ${{ secrets.AWS_REGION }}
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
@@ -41,7 +36,6 @@ jobs:
   
     - name: Deploy Lambda function
       run: |
-        # export ECR_REPOSITORY=305611566641.dkr.ecr.us-east-1.amazonaws.com/lambda-container-repo
         export IMAGE_TAG=${{ github.sha }}
         export IMAGE_URI=305611566641.dkr.ecr.us-east-1.amazonaws.com/lambda-container-repo:${{ github.sha }}
         FUNCTION_ARN=$(aws lambda get-function --function-name lambda-container --query 'Configuration.FunctionArn' --output text || true)
@@ -53,8 +47,11 @@ jobs:
               --timeout 15 \
               --memory-size 256
         else
-         # aws lambda update-function-configuration --function-name lambda-container --package-type Image --code ImageUri=$IMAGE_URI
          aws lambda update-function-code \
-            --function-name lambda-container \
-            --image-uri $IMAGE_URI
+              --function-name lambda-container \
+              --image-uri $IMAGE_URI
+         aws lambda update-function-configuration \
+           --function-name lambda-container \
+           --timeout 15 \
+           --memory-size 256
         fi
