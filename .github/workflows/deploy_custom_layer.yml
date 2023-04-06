@@ -25,13 +25,9 @@ jobs:
 
     - name: Package custom layer
       run: |
-        # mkdir package
-        # cp -r layers/* package
-        # cd package
-        # pip install -r ../layer_requirements.txt --target .
-        # zip -r ../custom_layer.zip .
         mkdir -p my_layer/python
-        pip install pandas numpy -t my_layer/python
+        pip install -r layer_requirements.txt -t my_layer/python
+        cp -r layers/* my_layer/python
         cd my_layer
         zip -r ../custom_layer.zip .
   
