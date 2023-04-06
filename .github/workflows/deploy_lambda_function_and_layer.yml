@@ -1,9 +1,7 @@
 name: Deploy Both Custom Layer and Lambda Function
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
   deploy:
