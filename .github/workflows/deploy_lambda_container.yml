@@ -32,18 +32,24 @@ jobs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
 
-    - name: Build and push Docker image
-      run: |
-        export ECR_REPOSITORY=/lambda-container-repo
-        export IMAGE_TAG=latest
-        docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
-        docker push $ECR_REPOSITORY:$IMAGE_TAG
-
+    # - name: Build and push Docker image
+    #   run: |
+    #     export ECR_REPOSITORY=/lambda-container-repo
+    #     export IMAGE_TAG=latest
+    #     docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
+    #     docker push $ECR_REPOSITORY:$IMAGE_TAG
+    - name: Build and Push Docker Image
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        push: true
+        tags: 305611566641.dkr.ecr.us-east-1.amazonaws.com/lambda-container-repo:${{ github.sha }}
+  
     - name: Deploy Lambda function
       run: |
-        export ECR_REPOSITORY=305611566641.dkr.ecr.us-east-1.amazonaws.com/lambda-container-repo
-        export IMAGE_TAG=latest
-        export IMAGE_URI=$ECR_REPOSITORY:$IMAGE_TAG
+        # export ECR_REPOSITORY=305611566641.dkr.ecr.us-east-1.amazonaws.com/lambda-container-repo
+        export IMAGE_TAG=${{ github.sha }}
+        export IMAGE_URI=305611566641.dkr.ecr.us-east-1.amazonaws.com/lambda-container-repo:${{ github.sha }}
         FUNCTION_ARN=$(aws lambda get-function --function-name lambda-container --query 'Configuration.FunctionArn' --output text || true)
         if [ "$FUNCTION_ARN" == "None" ]; then
           aws lambda create-function --function-name lambda-container --package-type Image --code ImageUri=$IMAGE_URI --timeout 15 --memory-size 256
