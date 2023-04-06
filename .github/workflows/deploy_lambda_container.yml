@@ -51,6 +51,7 @@ jobs:
         export IMAGE_TAG=${{ github.sha }}
         export IMAGE_URI=305611566641.dkr.ecr.us-east-1.amazonaws.com/lambda-container-repo:${{ github.sha }}
         FUNCTION_ARN=$(aws lambda get-function --function-name lambda-container --query 'Configuration.FunctionArn' --output text || true)
+        echo "function arn", $FUNCTION_ARN
         if [ "$FUNCTION_ARN" == "None" ]; then
           aws lambda create-function --function-name lambda-container --package-type Image --code ImageUri=$IMAGE_URI --timeout 15 --memory-size 256
         else
