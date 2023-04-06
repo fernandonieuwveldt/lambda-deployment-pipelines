@@ -16,16 +16,11 @@ jobs:
       with:
         python-version: 3.9
 
-    - name: Install custom layer dependencies
+    - name: Install AWS CLI
       run: |
-        python -m pip install --upgrade pip
-        pip install -r layer_requirements.txt
-
-    - name: Package custom layer
-      run: |
-        mkdir layer_python
-        pip install -r layer_requirements.txt --target layer_python
-        zip -r custom_layer.zip layer_python
+        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+        unzip awscliv2.zip
+        sudo ./aws/install
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
@@ -34,6 +29,22 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_REGION }}
 
-    - name: Deploy custom layer
+    # - name: Install custom layer dependencies
+    #   run: |
+    #     python -m pip install --upgrade pip
+    #     pip install -r layer_requirements.txt
+
+    - name: Package custom layer
       run: |
-        aws lambda publish-layer-version --layer-name CUSTOM_LAYER_NAME --zip-file fileb://custom_layer.zip
+        cd layers
+        pip install -r ../layer_requirements.txt --target .
+        zip -r ../custom_layer.zip .
+
+    - name: Upload custom layer to S3
+      run: |
+        aws s3 cp custom_layer.zip s3://lambda-layer-zips-fn/pandas_lambda_layer.zip
+
+
+    - name: Publish custom layer
+      run: |
+        aws lambda publish-layer-version --layer-name PANDAS_LAYER --content S3Bucket=lambda-layer-zips-fn,S3Key=pandas_lambda_layer.zip
