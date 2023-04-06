@@ -54,7 +54,7 @@ jobs:
         if [ -z "$FUNCTION_ARN" ]; then
           aws lambda create-function \
               --function-name lambda-container \
-              --role arn:aws:iam::305611566641:policy/githubActionLambdaRole \
+              --role arn:aws:iam::305611566641:role/service-role/github-actions-test-role-fj1yq5zk \
               --package-type Image --code ImageUri=$IMAGE_URI \
               --timeout 15 \
               --memory-size 256
