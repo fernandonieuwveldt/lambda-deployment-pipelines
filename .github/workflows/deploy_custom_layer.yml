@@ -25,12 +25,16 @@ jobs:
 
     - name: Package custom layer
       run: |
-        mkdir package
-        cp -r layers/* package
-        cd package
-        pip install -r ../layer_requirements.txt --target .
+        # mkdir package
+        # cp -r layers/* package
+        # cd package
+        # pip install -r ../layer_requirements.txt --target .
+        # zip -r ../custom_layer.zip .
+        mkdir -p my_layer/python
+        pip install pandas numpy -t my_layer/python
+        cd my_layer
         zip -r ../custom_layer.zip .
-
+  
     - name: Upload custom layer to S3
       run: |
         aws s3 cp custom_layer.zip s3://lambda-layer-zips-fn/pandas_lambda_layer.zip
