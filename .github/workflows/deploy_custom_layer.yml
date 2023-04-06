@@ -37,4 +37,6 @@ jobs:
 
     - name: Publish custom layer
       run: |
-        aws lambda publish-layer-version --layer-name PANDAS_LAYER --content S3Bucket=lambda-layer-zips-fn,S3Key=pandas_lambda_layer.zip
+        aws lambda publish-layer-version \
+            --layer-name PandasLayer \
+            --content S3Bucket=lambda-layer-zips-fn,S3Key=pandas_lambda_layer.zip
