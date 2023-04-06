@@ -16,12 +16,6 @@ jobs:
       with:
         python-version: 3.9
 
-    - name: Install AWS CLI
-      run: |
-        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-        unzip awscliv2.zip
-        sudo ./aws/install
-
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
@@ -43,7 +37,6 @@ jobs:
     - name: Upload custom layer to S3
       run: |
         aws s3 cp custom_layer.zip s3://lambda-layer-zips-fn/pandas_lambda_layer.zip
-
 
     - name: Publish custom layer
       run: |
