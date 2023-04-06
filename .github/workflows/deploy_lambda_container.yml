@@ -32,12 +32,6 @@ jobs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
 
-    # - name: Build and push Docker image
-    #   run: |
-    #     export ECR_REPOSITORY=/lambda-container-repo
-    #     export IMAGE_TAG=latest
-    #     docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
-    #     docker push $ECR_REPOSITORY:$IMAGE_TAG
     - name: Build and Push Docker Image
       uses: docker/build-push-action@v2
       with:
@@ -59,5 +53,8 @@ jobs:
               --timeout 15 \
               --memory-size 256
         else
-          aws lambda update-function-configuration --function-name lambda-container --package-type Image --code ImageUri=$IMAGE_URI
+         # aws lambda update-function-configuration --function-name lambda-container --package-type Image --code ImageUri=$IMAGE_URI
+         aws lambda update-function-code \
+            --function-name lambda-container \
+            --image-uri $IMAGE_URI
         fi
