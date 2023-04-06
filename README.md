@@ -10,7 +10,7 @@ This project demonstrates a modular approach to deploying an AWS Lambda function
   - `deploy_custom_layer.yml`: Contains the deployment pipeline for the custom layer.
   - `deploy_lambda_function.yml`: Contains the deployment pipeline for the Lambda function.
   - `deploy_lambda_container.yml`: Contains the deployment pipeline for the Lambda function using a Docker container.
-  - `deploy_both.yml`: Contains the pipeline that uses both the custom layer and Lambda function deployment pipelines.
+  - `deploy_lambda_function_and_layer.yml`: Contains the pipeline that uses both the custom layer and Lambda function deployment pipelines.
 
 ## Deployment Pipelines
 
@@ -22,7 +22,7 @@ There are four deployment pipelines to cater to different scenarios:
 
 3. **Lambda Function Deployment as Docker Container (`deploy_lambda_container.yml`):** This pipeline deploys the Lambda function using a Docker container. Useful when you want to package your Lambda function with a container image, which provides more flexibility in managing dependencies and runtime environment.
 
-4. **Both Custom Layer and Lambda Function Deployment (`deploy_both.yml`):** This pipeline deploys both the custom layer and the Lambda function together by utilizing the other two pipelines. Useful when you need to deploy updates to both components simultaneously.
+4. **Both Custom Layer and Lambda Function Deployment (`deploy_lambda_function_and_layer.yml`):** This pipeline deploys both the custom layer and the Lambda function together by utilizing the other two pipelines. Useful when you need to deploy updates to both components simultaneously.
 
 ## Custom Layer Dependencies
 

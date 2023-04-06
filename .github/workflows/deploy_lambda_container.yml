@@ -1,9 +1,7 @@
 name: Deploy Lambda function with Docker container
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
   deploy:
