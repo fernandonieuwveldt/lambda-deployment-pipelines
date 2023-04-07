@@ -39,6 +39,7 @@ jobs:
         export IMAGE_TAG=${{ github.sha }}
         export IMAGE_URI=305611566641.dkr.ecr.us-east-1.amazonaws.com/lambda-container-repo:${{ github.sha }}
         FUNCTION_ARN=$(aws lambda get-function --function-name lambda-container --query 'Configuration.FunctionArn' --output text || true)
+        
         if [ -z "$FUNCTION_ARN" ]; then
           aws lambda create-function \
               --function-name lambda-container \
@@ -51,7 +52,8 @@ jobs:
               --function-name lambda-container \
               --image-uri $IMAGE_URI \
               --publish
-
+        
+        # wait for the lambda function to complete the update before applying any config
         aws lambda wait function-updated \
           --function-name lambda-container
 
