@@ -2,7 +2,7 @@
 FROM public.ecr.aws/lambda/python:3.9
 
 # Copy function code and dependencies
-COPY src/ ${LAMBDA_TASK_ROOT}
+COPY container/app.py ${LAMBDA_TASK_ROOT}
 COPY requirements.txt ./
 
 # Install dependencies

@@ -36,15 +36,8 @@ Update the `requirements.txt` file with your Lambda function's dependencies. The
 
 The deployment process is handled by GitHub Actions, which will automatically build and deploy the selected components when you push changes to the main branch. You can manually trigger the `deploy_custom_layer.yml`, `deploy_lambda_function.yml`, and `deploy_lambda_container.yml` workflows using the `workflow_dispatch` event.
 
-## Using Cookiecutter
+To deploy your Lambda function using a Docker container, you can use the `deploy_lambda_container.yml` workflow. This workflow builds a Docker image containing your Lambda function code and dependencies, pushes the image to Amazon Elastic Container Registry (ECR), and deploys the Lambda function using the container image. This approach provides more flexibility in managing dependencies and the runtime environment of your Lambda function.
 
-To use the Cookiecutter template with this project, follow these steps:
-
-1. Install Cookiecutter: `pip install cookiecutter`
-2. Run the Cookiecutter command: `cookiecutter https://github.com/yourusername/cookiecutter-lambda-custom-layer`
-3. Fill in the prompted values to customize your project, such as project name, Lambda function name, custom layer name, and AWS account number.
-
-Cookiecutter will create a new folder with the generated project structure, which you can then customize and use as needed.
 
 ## Benefits of This Pipeline Approach
 
@@ -65,16 +58,11 @@ To incorporate this pipeline into a larger project, you can use the provided Coo
 `cookiecutter https://github.com/fdnieuwveldt/lambda-deployment-pipelines
 `
 
-
 When prompted, fill in the values for your project, such as project name, Lambda function name, custom layer name, and AWS account number. Cookiecutter will generate a new folder structure within your larger project that includes the necessary deployment pipelines and source code folders for the Lambda function and custom layer.
 
 To use only the custom layer or Lambda function deployment pipeline in your larger project, you can copy the corresponding YAML file(s) from the `.github/workflows/` folder into your project's `.github/workflows/` folder. Update the YAML file(s) as needed to match your project structure and requirements.
 
-## Deployment to AWS Lambda using Docker Container
-
-To deploy your Lambda function using a Docker container, you can use the `deploy_lambda_container.yml` workflow. This workflow builds a Docker image containing your Lambda function code and dependencies, pushes the image to Amazon Elastic Container Registry (ECR), and deploys the Lambda function using the container image. This approach provides more flexibility in managing dependencies and the runtime environment of your Lambda function.
-
-## Using Cookiecutter with the Project
+## Using Cookiecutter
 
 To use the Cookiecutter template with this project, follow these steps:
 
@@ -83,3 +71,98 @@ To use the Cookiecutter template with this project, follow these steps:
 3. Fill in the prompted values to customize your project, such as project name, Lambda function name, custom layer name, and AWS account number.
 
 Cookiecutter will create a new folder with the generated project structure, which you can then customize and use as needed.
+
+
+## A note on the IAM user and role permissions
+
+In your AWS account, create an IAM user with programmatic access and attach a policy with the required permissions to manage Lambda functions and layers. Store the AWS access key ID and secret access key as secrets in your GitHub repository with the names AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY.
+
+The following IAM policy should be attached to the IAM user the github actions is running on. This is the case for deploying lambda functions and custom layers.
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "0",
+            "Effect": "Allow",
+            "Action": [
+                "iam:ListRoles",
+                "lambda:CreateFunction",
+                "lambda:UpdateFunctionCode",
+                "lambda:PublishLayerVersion",
+                "lambda:UpdateFunctionConfiguration",
+                "lambda:DeleteLayerVersion",
+                "lambda:UpdateLayerVersion",
+                "s3:PutObject",
+                "s3:GetObject",
+                "s3:PutObjectAcl"
+            ],
+            "Resource": [
+                "arn:aws:s3:::your-s3-bucket-name/*",
+                "arn:aws:lambda:*:*:function:<your lambda function name>",
+                "arn:aws:lambda:*:*:layer:<your custom layer name>",
+                "arn:aws:lambda:*:*:layer:<your custom layer name>:*"
+            ]
+        }
+    ]
+}
+```
+
+An example for the IAM policy to deploy a lambda docker container. These are the minimum permissions you will need:
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "0",
+            "Effect": "Allow",
+            "Action": [
+                "iam:ListRoles",
+                "ecr:CreateRepository",
+                "ecr:DescribeRepositories",
+                "ecr:GetAuthorizationToken",
+                "ecr:InitiateLayerUpload",
+                "ecr:UploadLayerPart",
+                "ecr:CompleteLayerUpload",
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:PutImage"
+            ],
+            "Resource": [
+                "arn:aws:s3:::your-s3-bucket-name/*",
+                "arn:aws:lambda:*:123456789012:function:<your lambda function name>",
+                "arn:aws:lambda:*:123456789012:layer:<your custom layer name>",
+                "arn:aws:lambda:*:123456789012:layer:<your custom layer name>:*",
+                "arn:aws:ecr:*:123456789012:repository/<your ecr repository>"
+            ]
+        }
+    ]
+}
+
+```
+
+Finally, to create a new AWS Lambda function, the IAM role used to create the function should have permissions to perform the following actions:
+
+* `lambda:CreateFunction` - this permission allows the role to create a new Lambda function.
+* `lambda:UpdateFunctionCode` - this permission allows the role to update the code of an existing Lambda function.
+* `lambda:UpdateFunctionConfiguration` - this permission allows the role to update the configuration of an existing Lambda function.
+
+To grant these permissions to the IAM role, you can attach an appropriate IAM policy to the role. Here's an example policy that grants these permissions:
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "lambda:CreateFunction",
+                "lambda:UpdateFunctionCode",
+                "lambda:UpdateFunctionConfiguration"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
+```
