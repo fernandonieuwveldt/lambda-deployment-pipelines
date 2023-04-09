@@ -1,5 +1,10 @@
 name: Deploy Lambda function with Docker container
 
+env:
+  ECR_REPOSITORY: {{ cookiecutter.ecr_repository }}
+  LAMBDA_ROLE_ARN: {{ cookiecutter.lambda_role_arn }}
+  LAMBDA_CONTAINER_NAME: {{ cookiecutter.lambda_container_name }}
+
 on:
   workflow_dispatch:
 
@@ -32,33 +37,33 @@ jobs:
       with:
         context: .
         push: true
-        tags: 305611566641.dkr.ecr.us-east-1.amazonaws.com/lambda-container-repo:${{ github.sha }}
+        tags: ${{ secrets.AWS_ACCOUNT }}.dkr.ecr.{{ secrets.AWS_REGION }}.amazonaws.com/$ECR_REPOSITORY:${{ github.sha }}
   
     - name: Deploy Lambda function
       run: |
         export IMAGE_TAG=${{ github.sha }}
-        export IMAGE_URI=305611566641.dkr.ecr.us-east-1.amazonaws.com/lambda-container-repo:${{ github.sha }}
-        FUNCTION_ARN=$(aws lambda get-function --function-name lambda-container --query 'Configuration.FunctionArn' --output text || true)
+        export IMAGE_URI=${{ secrets.AWS_ACCOUNT }}.dkr.ecr.{{ secrets.AWS_REGION }}.amazonaws.com/$ECR_REPOSITORY:${{ github.sha }}
+        FUNCTION_ARN=$(aws lambda get-function --function-name $LAMBDA_CONTAINER_NAME --query 'Configuration.FunctionArn' --output text || true)
         
         if [ -z "$FUNCTION_ARN" ]; then
           aws lambda create-function \
-              --function-name lambda-container \
-              --role arn:aws:iam::305611566641:role/service-role/github-actions-test-role-fj1yq5zk \
+              --function-name $LAMBDA_CONTAINER_NAME \
+              --role arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/service-role/$LAMBDA_ROLE_ARN \
               --package-type Image --code ImageUri=$IMAGE_URI \
               --timeout 15 \
               --memory-size 256
         else
          aws lambda update-function-code \
-              --function-name lambda-container \
+              --function-name $LAMBDA_CONTAINER_NAME \
               --image-uri $IMAGE_URI \
               --publish
         
         # wait for the lambda function to complete the update before applying any config
         aws lambda wait function-updated \
-          --function-name lambda-container
+          --function-name $LAMBDA_CONTAINER_NAME
 
          aws lambda update-function-configuration \
-           --function-name lambda-container \
+           --function-name $LAMBDA_CONTAINER_NAME \
            --timeout 15 \
            --memory-size 256
         fi

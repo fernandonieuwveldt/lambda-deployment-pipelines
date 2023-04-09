@@ -1,5 +1,9 @@
 name: Deploy Custom Layer
 
+env:
+  LAYER_NAME: {{ cookiecutter.layer_name }}
+  S3_BUCKET: ${{ secrets.S3_BUCKET }}
+
 on:
   workflow_dispatch:
 
@@ -33,10 +37,10 @@ jobs:
   
     - name: Upload custom layer to S3
       run: |
-        aws s3 cp custom_layer.zip s3://lambda-layer-zips-fn/pandas_lambda_layer.zip
+        aws s3 cp custom_layer.zip s3://$S3_BUCKET/$LAYER_NAME.zip
 
     - name: Publish custom layer
       run: |
         aws lambda publish-layer-version \
-            --layer-name PandasLayer \
-            --content S3Bucket=lambda-layer-zips-fn,S3Key=pandas_lambda_layer.zip
+            --layer-name $LAYER_NAME \
+            --content S3Bucket=$S3_BUCKET,S3Key=$LAYER_NAME.zip
