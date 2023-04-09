@@ -1,5 +1,8 @@
 name: Deploy Lambda Function
 
+env:
+  LAMBDA_FUNCTION_NAME: {{ cookiecutter.layer_name }}
+
 on:
   workflow_dispatch:
 
@@ -33,4 +36,6 @@ jobs:
 
     - name: Deploy Lambda function
       run: |
-        aws lambda update-function-code --function-name github-actions-test --zip-file fileb://lambda_function.zip
+        aws lambda update-function-code \
+             --function-name $LAMBDA_FUNCTION_NAME \
+             --zip-file fileb://lambda_function.zip
