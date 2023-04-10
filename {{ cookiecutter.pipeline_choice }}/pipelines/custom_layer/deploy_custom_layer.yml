@@ -1,0 +1,46 @@
+name: Deploy Custom Layer
+
+env:
+  LAYER_NAME: {{ cookiecutter.layer_name }}
+  S3_BUCKET: ${{ secrets.S3_BUCKET }}
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Package custom layer
+      run: |
+        mkdir -p my_layer/python
+        pip install -r layer_requirements.txt -t my_layer/python
+        cp -r layers/* my_layer/python
+        cd my_layer
+        zip -r ../custom_layer.zip .
+  
+    - name: Upload custom layer to S3
+      run: |
+        aws s3 cp custom_layer.zip s3://$S3_BUCKET/$LAYER_NAME.zip
+
+    - name: Publish custom layer
+      run: |
+        aws lambda publish-layer-version \
+            --layer-name $LAYER_NAME \
+            --content S3Bucket=$S3_BUCKET,S3Key=$LAYER_NAME.zip
