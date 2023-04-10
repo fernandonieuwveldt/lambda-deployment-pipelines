@@ -1,7 +1,7 @@
 name: Deploy Lambda Function
 
 env:
-  LAMBDA_FUNCTION_NAME: {{ cookiecutter.layer_name }}
+  LAMBDA_FUNCTION_NAME: {{ cookiecutter.lambda_function_name }}
 
 on:
   workflow_dispatch:
