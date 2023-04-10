@@ -1,6 +1,6 @@
 import sys
 from cookiecutter.main import cookiecutter
-
+print(1/0)
 # Define default values for each pipeline
 lambda_function_vars = {
     "lambda_function_name": "your_default_lambda_function_name",
