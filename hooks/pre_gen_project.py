@@ -27,6 +27,7 @@ pipeline_vars = {
 
 # Get the chosen pipeline from the user input
 chosen_pipeline = "{{ cookiecutter.pipeline_choice }}"
+print(chosen_pipeline)
 
 # Loop through the chosen pipeline's variables
 for var_name, default_value in pipeline_vars[chosen_pipeline].items():
