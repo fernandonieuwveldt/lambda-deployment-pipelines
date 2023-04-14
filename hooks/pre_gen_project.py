@@ -1,33 +1,45 @@
+import json
 import os
 import sys
 
-def prompt_user(prompt):
-    try:
-        return sys.raw_input(prompt)
-    except NameError:
-        return input(prompt)
+cookiecutter_json_file = os.path.join(os.path.dirname(__file__), '..', 'cookiecutter.json')
 
-choices = {
-    'lambda_function': 'pipelines/lambda_function/deploy_lambda_function.yml',
-    'custom_layer': 'pipelines/custom_layer/deploy_custom_layer.yml',
-    'both': 'pipelines/lambda_function_and_layer/deploy_lambda_function_and_layer.yml',
-    'container': 'pipelines/lambda_container/deploy_lambda_container.yml'
-}
+def read_json_file(filepath):
+    with open(filepath, 'r') as f:
+        return json.load(f)
 
-pipeline_choice = '{{ cookiecutter.pipeline_choice }}'
-lambda_function_name = "test_function"  # prompt_user("Enter the Lambda function name: ")
+def write_json_file(filepath, data):
+    with open(filepath, 'w') as f:
+        json.dump(data, f, indent=4)
 
-# Update the chosen pipeline's YAML file with the user-provided values
-src = choices[pipeline_choice]
+def update_cookiecutter_json(pipeline_choice):
+    cookiecutter_data = read_json_file(cookiecutter_json_file)
 
-# Ensure the destination directory exists
-dst_dir = os.path.join('{{ cookiecutter.pipeline_choice }}')
-os.makedirs(dst_dir, exist_ok=True)
-dst = os.path.join(dst_dir, os.path.basename(src))
+    default_values = {
+        'custom_layer': {
+            'layer_name': 'example_layer'
+        },
+        'lambda_container': {
+            'container_name': 'example_container'
+        },
+        'lambda_function': {
+            'function_name': 'example_function'
+        },
+        'lambda_function_and_layer': {
+            'function_name': 'example_function',
+            'layer_name': 'example_layer'
+        }
+    }
 
-print("src", src)
-print("dst", dst)
+    for key, value in default_values[pipeline_choice].items():
+        cookiecutter_data[key] = value
 
-with open(src, 'rt') as f_src, open(dst, 'wt') as f_dst:
-    for line in f_src:
-        f_dst.write(line.replace('{{ cookiecutter.lambda_function_name }}', lambda_function_name))
+    write_json_file(cookiecutter_json_file, cookiecutter_data)
+
+pipeline_choice = "{{ cookiecutter.pipeline_choice }}"
+
+if pipeline_choice not in ['custom_layer', 'lambda_container', 'lambda_function', 'lambda_function_and_layer']:
+    print(f"ERROR: Invalid pipeline choice '{pipeline_choice}'.")
+    sys.exit(1)
+
+update_cookiecutter_json(pipeline_choice)
