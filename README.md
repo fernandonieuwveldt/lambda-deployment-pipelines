@@ -3,14 +3,28 @@
 This project demonstrates a modular approach to deploying an AWS Lambda function and custom layer using GitHub Actions. The custom layer can be used by multiple Lambda functions in your AWS account. The deployment pipelines are separated into individual YAML files, providing better modularity and separation of concerns.
 
 ## Folder Structure
-
-- `src/`: Contains the source code for the Lambda function.
-- `layers/`: Contains the custom layers you may want to include.
-- `.github/workflows/`:
-  - `deploy_custom_layer.yml`: Contains the deployment pipeline for the custom layer.
-  - `deploy_lambda_function.yml`: Contains the deployment pipeline for the Lambda function.
-  - `deploy_lambda_container.yml`: Contains the deployment pipeline for the Lambda function using a Docker container.
-  - `deploy_lambda_function_and_layer.yml`: Contains the pipeline that uses both the custom layer and Lambda function deployment pipelines.
+```bash
+├── LICENSE
+├── README.md
+├── cookiecutter.json
+├── hooks
+│   └── post_gen_project.py
+└── {{cookiecutter.project_name}}
+    ├── custom_layer
+    │   ├── deploy_custom_layer.yml
+    │   ├── layer_module.py
+    │   └── layer_requirements.txt
+    ├── lambda_container
+    │   ├── Dockerfile
+    │   ├── app.py
+    │   └── deploy_lambda_container.yml
+    ├── lambda_function
+    │   ├── deploy_lambda_function.yml
+    │   ├── lambda_function.py
+    │   └── requirements.txt
+    └── lambda_function_and_layer
+        └── deploy_lambda_function_and_layer.yml
+```
 
 ## Deployment Pipelines
 
@@ -51,17 +65,6 @@ To deploy your Lambda function using a Docker container, you can use the `deploy
 
 5. **Time-saving and consistency:** By automating the build and deployment process, developers can focus on writing code and improving the application, rather than spending time on manual deployment tasks. The pipelines also ensure consistent packaging and deployment of the components across different environments, reducing the risk of errors due to manual processes or misconfigurations.
 
-## Incorporating the Pipeline into a Larger Project
-
-To incorporate this pipeline into a larger project, you can use the provided Cookiecutter template. Run the Cookiecutter command, providing the URL to the GitHub repository containing the template:
-
-`cookiecutter https://github.com/fdnieuwveldt/lambda-deployment-pipelines
-`
-
-When prompted, fill in the values for your project, such as project name, Lambda function name, custom layer name, and AWS account number. Cookiecutter will generate a new folder structure within your larger project that includes the necessary deployment pipelines and source code folders for the Lambda function and custom layer.
-
-To use only the custom layer or Lambda function deployment pipeline in your larger project, you can copy the corresponding YAML file(s) from the `.github/workflows/` folder into your project's `.github/workflows/` folder. Update the YAML file(s) as needed to match your project structure and requirements.
-
 ## Using Cookiecutter
 
 To use the Cookiecutter template with this project, follow these steps:
@@ -70,12 +73,15 @@ To use the Cookiecutter template with this project, follow these steps:
 2. Run the Cookiecutter command: `cookiecutter https://github.com/yourusername/cookiecutter-lambda-custom-layer`
 3. Fill in the prompted values to customize your project, such as project name, Lambda function name, custom layer name, and AWS account number.
 
+When prompted, fill in the values for your project, such as project name, Lambda function name, custom layer name. Cookiecutter will generate a new folder structure within your larger project that includes the necessary deployment pipelines and source code folders for the Lambda function and custom layer.
+
+
 Cookiecutter will create a new folder with the generated project structure, which you can then customize and use as needed.
 
 
 ## A note on the IAM user and role permissions
 
-In your AWS account, create an IAM user with programmatic access and attach a policy with the required permissions to manage Lambda functions and layers. Store the AWS access key ID and secret access key as secrets in your GitHub repository with the names AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY.
+In your AWS account, create an IAM user with programmatic access and attach a policy with the required permissions to manage Lambda functions and layers. Store the AWS access key ID and secret access key as secrets in your GitHub repository with the names AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY. Also need to add a AWS_ACCOUNT secret.
 
 The following IAM policy should be attached to the IAM user the github actions is running on. This is the case for deploying lambda functions and custom layers.
 

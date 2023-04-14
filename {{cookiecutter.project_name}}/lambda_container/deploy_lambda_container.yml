@@ -2,8 +2,11 @@ name: Deploy Lambda function with Docker container
 
 env:
   ECR_REPOSITORY: {{ cookiecutter.ecr_repository }}
-  LAMBDA_ROLE_ARN: {{ cookiecutter.lambda_role_arn }}
+  LAMBDA_ROLE_ARN: {{ cookiecutter.lambda_function_role_arn }}
   LAMBDA_CONTAINER_NAME: {{ cookiecutter.lambda_container_name }}
+  # set env from secrets
+  AWS_REGION: {% raw %}${{ secrets.AWS_REGION }}{% endraw %}
+  AWS_ACCOUNT: {% raw %}${{ secrets.AWS_ACCOUNT }}{% endraw %}
 
 on:
   workflow_dispatch:
@@ -21,12 +24,12 @@ jobs:
       with:
         python-version: 3.9
 
-    - name: Configure AWS Credentials
+    - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ secrets.AWS_REGION }}
+        aws-access-key-id: {% raw %}${{ secrets.AWS_ACCESS_KEY_ID }}{% endraw %}
+        aws-secret-access-key: {% raw %}${{ secrets.AWS_SECRET_ACCESS_KEY }}{% endraw %}
+        aws-region: {% raw %}${{ secrets.AWS_REGION }}{% endraw %}
 
     - name: Login to Amazon ECR
       id: login-ecr
@@ -37,18 +40,18 @@ jobs:
       with:
         context: .
         push: true
-        tags: ${{ secrets.AWS_ACCOUNT }}.dkr.ecr.{{ secrets.AWS_REGION }}.amazonaws.com/$ECR_REPOSITORY:${{ github.sha }}
+        tags: $AWS_ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:{% raw %}${{ github.sha }}{% endraw %}
   
     - name: Deploy Lambda function
       run: |
-        export IMAGE_TAG=${{ github.sha }}
-        export IMAGE_URI=${{ secrets.AWS_ACCOUNT }}.dkr.ecr.{{ secrets.AWS_REGION }}.amazonaws.com/$ECR_REPOSITORY:${{ github.sha }}
+        export IMAGE_TAG={% raw %}${{ github.sha }}{% endraw %}
+        export IMAGE_URI=$AWS_ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:{% raw %}${{ github.sha }}{% endraw %}
         FUNCTION_ARN=$(aws lambda get-function --function-name $LAMBDA_CONTAINER_NAME --query 'Configuration.FunctionArn' --output text || true)
         
         if [ -z "$FUNCTION_ARN" ]; then
           aws lambda create-function \
               --function-name $LAMBDA_CONTAINER_NAME \
-              --role arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/service-role/$LAMBDA_ROLE_ARN \
+              --role arn:aws:iam::$AWS_ACCOUNT:role/service-role/$LAMBDA_ROLE_ARN \
               --package-type Image --code ImageUri=$IMAGE_URI \
               --timeout 15 \
               --memory-size 256

@@ -1,0 +1,13 @@
+{
+    "project_name": "my_lambda_project",
+    "pipeline_choice": ["lambda_function", "custom_layer", "lambda_function_and_layer", "lambda_container"],
+    "lambda_function_name": "lambda_function",
+    "layer_name": "layer_name",
+    "lambda_function_role_arn": "arn:aws:iam::123456789012:role/your_lambda_function_role",
+    "custom_layer_role_arn": "arn:aws:iam::123456789012:role/your_custom_layer_role",
+    "both_role_arn": "arn:aws:iam::123456789012:role/your_both_role",
+    "container_role_arn": "arn:aws:iam::123456789012:role/your_container_role",
+    "ecr_repository": "your_default_ecr_repo_name",
+    "lambda_container_name": "lambda_container_name",
+    "_copy_without_render": ["{{cookiecutter.pipeline_choice}}"]
+  }
