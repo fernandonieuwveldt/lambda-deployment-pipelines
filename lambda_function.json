@@ -1,4 +1,0 @@
-{
-    "pipeline_choice": "lambda_function",
-    "function_name": "example_function"
-}
