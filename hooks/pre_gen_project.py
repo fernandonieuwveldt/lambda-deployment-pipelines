@@ -1,45 +1,44 @@
+import os
+import shutil
 import sys
-from cookiecutter.main import cookiecutter
-print(1/0)
-# Define default values for each pipeline
-lambda_function_vars = {
-    "lambda_function_name": "your_default_lambda_function_name",
+
+def prompt_user(prompt):
+    try:
+        return sys.raw_input(prompt)
+    except NameError:
+        return input(prompt)
+
+pipelines_dir = 'pipelines'
+choices = {
+    'lambda_function': 'pipelines/lambda_function/deploy_lambda_function.yml',
+    'custom_layer': 'pipelines/custom_layer/deploy_custom_layer.yml',
+    'lambda_function_and_layer': 'pipelines/lambda_function_and_layer/deploy_lambda_function_and_layer.yml',
+    'container': 'pipelines/lambda_container/deploy_lambda_container.yml'
 }
 
-custom_layer_vars = {
-    "layer_name": "your_default_layer_name",
-}
+pipeline_choice = '{{ cookiecutter.pipeline_choice }}'
+lambda_function_name = "test_function"  # prompt_user("Enter the Lambda function name: ")
 
-lambda_function_and_layer_vars = {**lambda_function_vars, **custom_layer_vars}
+# Prompt the user for required values based on the chosen pipeline
+# if pipeline_choice == "lambda_function":
+#     lambda_function_name = prompt_user("Enter the Lambda function name: ")
+# elif pipeline_choice == "custom_layer":
+#     role_arn = prompt_user("Enter the custom layer role ARN: ")
+# elif pipeline_choice == "both":
+#     role_arn = prompt_user("Enter the role ARN for both Lambda function and custom layer: ")
+# else:
+#     role_arn = prompt_user("Enter the role ARN for the Lambda container: ")
+#     ecr_repository = prompt_user("Enter the ECR repository name: ")
 
-container_vars = {
-    "container_role_arn": "your_default_container_role_arn",
-    "ecr_repository": "your_default_ecr_repo_name",
-}
+# Update the chosen pipeline's YAML file with the user-provided values
+src = os.path.join(pipelines_dir, choices[pipeline_choice])
+# dst = os.path.join('{{ cookiecutter.pipeline_choice }}', os.path.basename(src))
+dst = os.path.join(pipeline_choice, os.path.basename(src))
 
-# Map pipeline choices to their respective variable dictionaries
-pipeline_vars = {
-    "lambda_function": lambda_function_vars,
-    "custom_layer": custom_layer_vars,
-    "both": lambda_function_and_layer_vars,
-    "container": container_vars,
-}
+# print("src", src)
+# print("dst", dst)
 
-# Get the chosen pipeline from the user input
-chosen_pipeline = "{{ cookiecutter.pipeline_choice }}"
-print(chosen_pipeline)
-
-# Loop through the chosen pipeline's variables
-for var_name, default_value in pipeline_vars[chosen_pipeline].items():
-    # Prompt the user for the required input
-    user_value = input(f"Enter the value for {var_name} (default: {default_value}): ").strip()
-
-    # Update the chosen pipeline's YAML file with the user-provided value or the default value
-    yaml_file_path = f"pipelines/deploy_{chosen_pipeline}.yml"
-    with open(yaml_file_path, "r") as yaml_file:
-        content = yaml_file.read()
-
-    content = content.replace(f"{{{var_name}}}", user_value or default_value)
-
-    with open(yaml_file_path, "w") as yaml_file:
-        yaml_file.write(content)
+# with open(dst, 'wt') as f_dst:  #open(src, 'rt') as f_src: # , open(dst, 'wt') as f_dst:
+#     for line in f_dst:
+#         # f_dst.write(line.replace('{{ cookiecutter.lambda_function_name }}', lambda_function_name))
+#         print("ddd")
