@@ -73,8 +73,6 @@ To use the Cookiecutter template with this project, follow these steps:
 2. Run the Cookiecutter command: `cookiecutter https://github.com/yourusername/cookiecutter-lambda-custom-layer`
 3. Fill in the prompted values to customize your project, such as project name, Lambda function name, custom layer name, and AWS account number.
 
-When prompted, fill in the values for your project, such as project name, Lambda function name, custom layer name. Cookiecutter will generate a new folder structure within your larger project that includes the necessary deployment pipelines and source code folders for the Lambda function and custom layer.
-
 
 Cookiecutter will create a new folder with the generated project structure, which you can then customize and use as needed.
 
